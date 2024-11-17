@@ -1,0 +1,44 @@
+name: HTML-CSS-JS CI/CD Workflow
+
+# Trigger workflow on pushes and pull requests to the main branch
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # Linting Job for CSS and JS
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v3
+      
+      # Install dependencies for linting
+      - name: Install Node.js and Dependencies
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - run: npm install
+      - name: Run ESLint for JS
+        run: npx eslint scripts/
+      - name: Run Stylelint for CSS
+        run: npx stylelint "**/*.css"
+
+  # Deployment Job
+  deploy:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v3
+
+      # Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: . # Deploy root folder
